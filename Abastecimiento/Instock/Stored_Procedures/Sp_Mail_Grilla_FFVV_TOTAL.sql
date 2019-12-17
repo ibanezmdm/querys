@@ -1,0 +1,46 @@
+USE [INFORMES3]
+GO
+/****** Object:  StoredProcedure [dbo].[Sp_Mail_Grilla_FFVV_TOTAL]    Script Date: 20-11-2019 16:49:36 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Carlos Reyes L.
+-- Create date: 14-02-2018
+-- Description:	Crea Grilla INSTOCK FFVV Total
+-- EXEC [INFORMES3].[dbo].[Sp_Mail_Grilla_FFVV_TOTAL]
+-- =============================================
+ALTER PROCEDURE [dbo].[Sp_Mail_Grilla_FFVV_TOTAL] 
+
+AS
+BEGIN
+TRUNCATE TABLE [INFORMES3].[dbo].[FFVV_INSTOCK_TOTAL_DIA]
+
+INSERT INTO [INFORMES3].[dbo].[FFVV_INSTOCK_TOTAL_DIA] (
+	[Cuadro Resumen]
+	,[FECHA]
+	,[INSTOCK]
+)
+
+
+-- SELECT 'TOTAL FFVV'  AS [Cuadro Resumen]
+--        ,B.FECHA
+--        ,''+CONVERT(VARCHAR(10),CONVERT(NUMERIC(12,1),SUM([NUM_OH_VALORIZADO])/nullif(SUM([NUM_VTA_SEM_X_PERFIL]),0)*100))+'%' 		AS INSTOCK
+-- --INTO [INFORMES3].[dbo].[FFVV_INSTOCK_TOTAL_DIA]
+-- FROM dbo.CE_INSTOCK_FYV AS A
+--   JOIN [INFORMES3].dbo.DHW_MES_GC  AS B ON B.FECHA=CONVERT(DATE,A.FECHA_ACTUALIZ) 
+--  where COD_LOCAL not in (209,203,205,202,206,105,129,107,207)
+-- GROUP BY B.FECHA
+
+SELECT 
+	'TOTAL FFVV'  AS [Cuadro Resumen]
+	,A.FECHA_ACTUALIZ AS FECHA
+	,''+CONVERT(VARCHAR(10),CONVERT(NUMERIC(12,1),SUM([NUM_OH_VALORIZADO])/nullif(SUM([NUM_VTA_SEM_X_PERFIL]),0)*100))+'%' AS INSTOCK
+FROM dbo.CE_INSTOCK_FYV AS A
+LEFT JOIN [INFORMES3].[dbo].[TIENDAS_ASENTADAS] T
+	ON A.COD_LOCAL = T.COD_LOCAL
+WHERE T.COD_LOCAL IS NULL
+GROUP BY A.FECHA_ACTUALIZ
+
+END

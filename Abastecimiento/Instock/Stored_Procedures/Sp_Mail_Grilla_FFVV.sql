@@ -1,0 +1,53 @@
+USE [INFORMES3]
+GO
+/****** Object:  StoredProcedure [dbo].[Sp_Mail_Grilla_FFVV]    Script Date: 20-11-2019 16:41:14 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Carlos Reyes L.
+-- Create date: 14-02-2018
+-- Description:	Crea Grilla INSTOCK FFVV
+-- EXEC [INFORMES3].[dbo].[Sp_Mail_Grilla_FFVV]
+-- =============================================
+ALTER PROCEDURE [dbo].[Sp_Mail_Grilla_FFVV] 
+-- Add the parameters for the stored procedure here
+AS
+BEGIN
+TRUNCATE TABLE [INFORMES3].[dbo].[FFVV_GRILLA_INSTOCK_SUBDEPTO]
+
+INSERT INTO [INFORMES3].[dbo].[FFVV_GRILLA_INSTOCK_SUBDEPTO] (
+	[Cuadro Resumen]
+	,[FECHA]
+	,[SUBDEP]
+	,[INSTOCK]
+)
+-- SELECT 
+-- 	'1-INSTOCK SUBDEPTO' AS [Cuadro Resumen]
+-- 	,B.FECHA
+-- 	,A.SUBDEP
+-- 	,''+CONVERT(VARCHAR(10),CONVERT(NUMERIC(12,1),SUM([NUM_OH_VALORIZADO])/nullif(SUM([NUM_VTA_SEM_X_PERFIL]),0)*100))+'%' AS INSTOCK
+-- FROM dbo.CE_INSTOCK_FYV AS A
+-- JOIN [INFORMES3].dbo.DHW_MES_GC AS B 
+-- 	ON B.FECHA=CONVERT(DATE,A.FECHA_ACTUALIZ)
+--   where COD_LOCAL not in (209,203,205,202,206,105,129,107,207)
+-- GROUP BY B.FECHA,A.SUBDEP
+
+SELECT 
+	'1-INSTOCK SUBDEPTO' AS [Cuadro Resumen]
+	,B.FECHA
+	,A.SUBDEP
+	,''+CONVERT(VARCHAR(10),CONVERT(NUMERIC(12,1),SUM([NUM_OH_VALORIZADO])/nullif(SUM([NUM_VTA_SEM_X_PERFIL]),0)*100))+'%' AS INSTOCK
+FROM dbo.CE_INSTOCK_FYV AS A
+JOIN [INFORMES3].dbo.DHW_MES_GC AS B 
+	ON B.FECHA=CONVERT(DATE, A.FECHA_ACTUALIZ)
+LEFT JOIN [INFORMES3].[dbo].[TIENDAS_ASENTADAS] T
+	ON A.COD_LOCAL = T.COD_LOCAL
+WHERE T.COD_LOCAL IS NULL
+GROUP BY
+	B.FECHA,
+	A.SUBDEP
+
+
+END
