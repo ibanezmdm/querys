@@ -15,11 +15,11 @@ LEFT JOIN [INFORMES3].[dbo].[TIENDAS_ASENTADAS] T
 WHERE 
 	(
 		(
-			I.division IN ('J01 - PGC COMESTIBLE')
+			I.division IN ('J01 - PGC COMESTIBLE', 'J02 - PGC NO COMESTIBLE', 'J05 - FLC')
 			AND I.sis_reposicion IN ('Reposicion x ASR', 'Informar a ASR') 
 		) 
 		OR (
-			I.division IN ('J02 - PGC NO COMESTIBLE', 'J05 - FLC', 'J06 - PANADERIA Y PASTELERIA', 'J07 - PLATOS PREPARADOS')
+			I.division IN ('J06 - PANADERIA Y PASTELERIA', 'J07 - PLATOS PREPARADOS')
 			AND I.sis_reposicion IN ('Reposicion x ASR')
 		) 
 	)

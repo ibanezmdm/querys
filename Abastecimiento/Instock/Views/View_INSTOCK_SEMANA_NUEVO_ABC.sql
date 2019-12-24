@@ -1,9 +1,10 @@
 /*-- ?? SELECT * FROM [INFORMES3].[dbo].[View_INSTOCK_SEMANA_NUEVO_ABC]
  * Updated_by: Sebastian E Cornejo B
- * Updated_at: 2019/11/28
+ * Updated_at: 2019/12/23
  * Cambios: 
  *	-> Se cruza con tabla TIENDAS_ASENTADAS para filtrar por tiendas cerradas
  *	-> Se genera una nueva vista con una sola consutla
+ *	-> Se actualizan filtros J02 y J05
  */
 
 
@@ -40,12 +41,12 @@ FROM (
 			AND T.COD_LOCAL IS NULL
 			AND (
 				(
-				DIVISION IN ('J01 - PGC COMESTIBLE') 
+				DIVISION IN ('J01 - PGC COMESTIBLE', 'J02 - PGC NO COMESTIBLE', 'J05 - FLC')
 				AND SIS_REPOSICION IN ('Reposicion x ASR', 'Informar a ASR') 
 				) 
 				OR (
-					DIVISION IN ('J02 - PGC NO COMESTIBLE', 'J05 - FLC', 'J06 - PANADERIA Y PASTELERIA', 'J07 - PLATOS PREPARADOS') 
-					AND SIS_REPOSICION IN ('Reposicion x ASR') 
+					DIVISION IN ('J06 - PANADERIA Y PASTELERIA', 'J07 - PLATOS PREPARADOS') 
+					AND SIS_REPOSICION IN ('Reposicion x ASR')
 				)
 			)
 		GROUP BY 
