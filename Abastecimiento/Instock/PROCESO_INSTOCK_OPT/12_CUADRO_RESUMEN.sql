@@ -1,0 +1,4 @@
+--======CUADRO RESUMEN ====================
+
+ 
+-- EXEC SP_NUEVO_INSTOCK_MAIL_CUADRO_RESUMEN_v2
