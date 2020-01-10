@@ -1,6 +1,8 @@
 /* Updated_at: 2019/11/20
  * Updated_by: Sebastian Cornejo
- * Detalle: Filtro de salas cerradas se hace en la vista
+ * Detalle: 
+ *	-> 2019/11/20: Filtro de salas cerradas se hace en la vista
+ *	-> 2020/01/08: Se agrega campo EDLP
  */
 
 -- INSERT INTO [INFORMES3].[dbo].[INSTOCK_DIARIO_RESUMEN] (
@@ -12,19 +14,21 @@
 -- 	,[MMPP]
 -- 	,[IMPORTADOS]
 -- 	,[FECHA]
+-- 	,[EDLP]
 -- )
 
 SELECT 
-	[COMPAÑÍA]
-	,[TOP500]
-	,[TOP2100]
-	,[PGC]
-	,[PERECIBLES]
-	,[MMPP]
-	,[IMPORTADOS]
+	CONVERT(NUMERIC(12,1), [COMPAÑIA]) [COMPAÑÍA]
+	,CONVERT(NUMERIC(12,1), [TOP500]) [TOP500]
+	,CONVERT(NUMERIC(12,1), [TOP2100]) [TOP2100]
+	,CONVERT(NUMERIC(12,1), [PGC]) [PGC]
+	,CONVERT(NUMERIC(12,1), [PERECIBLES]) [PERECIBLES]
+	,CONVERT(NUMERIC(12,1), [MMPP]) [MMPP]
+	,CONVERT(NUMERIC(12,1), [IMPORTADO]) [IMPORTADOS]
 	,[FECHA_ACTUALIZ] AS [FECHA]
-FROM [INFORMES3].[dbo].[View_NUEVO_INSTOCK_TABLA_DIA] I
+	,CONVERT(NUMERIC(12,1), [EDLP]) [EDLP]
+FROM [INFORMES3].[dbo].[View_NUEVO_INSTOCK_TABLA_DIA_v2] I
 PIVOT (
 	SUM(I.[INSTOCK])
-	FOR [Cuadro Resumen] IN ([COMPAÑÍA], [TOP500], [TOP2100], [PGC], [PERECIBLES], [MMPP], [IMPORTADOS])
+	FOR [CUADRO_RESUMEN] IN ([COMPAÑIA], [TOP500], [TOP2100], [PGC], [PERECIBLES], [MMPP], [IMPORTADO], [EDLP])
 ) AS pvtable

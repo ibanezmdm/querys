@@ -1,10 +1,11 @@
 /*-- ?? SELECT * FROM [INFORMES3].[dbo].[View_NUEVO_INSTOCK_TABLA_DIA_v2]
  * Updated_by: Sebastian E Cornejo B
- * Updated_at: 2019/12/23
+ * Updated_at: 2020/01/08
  * Cambios: 
  *	-> Se cruza con tabla TIENDAS_ASENTADAS para filtrar por tiendas cerradas
  *	-> Se genera una nueva vista con una sola consutla
  *	-> Se actualizan filtros de J02 y J05
+ *	-> 2020/01/08 Se Agrega Instock EDLP
  */
 
 SELECT 
@@ -70,11 +71,16 @@ FROM (
 			CASE WHEN I.[MMPP] IS NOT NULL THEN 1 END [MMPP],
 
 			-- Filtro Instock Importado
-			CASE WHEN I.[PROCEDENCIA] = 'IMPORTADO' THEN 1 END [IMPORTADO]
+			CASE WHEN I.[PROCEDENCIA] = 'IMPORTADO' THEN 1 END [IMPORTADO],
+
+			-- Filtro Instock EDLP
+			CASE WHEN EDLP.[EDLP] = 'X' THEN 1 END [EDLP]
 
 		FROM [INFORMES3].[dbo].[INSTOCK_NUEVA_PLANILLA] I
 		LEFT JOIN [INFORMES3].[dbo].[TIENDAS_ASENTADAS] T
 			ON I.[COD_LOCAL] = T.[COD_LOCAL]
+		LEFT JOIN INSTOCK_OPT.dbo.SKU_EDLP EDLP
+			ON EDLP.SKU = I.SKU
 
 		WHERE T.[COD_LOCAL] IS NULL
 		GROUP BY 
@@ -84,7 +90,8 @@ FROM (
 			I.[TOP_500],
 			I.[TOP_2100],
 			I.[MMPP],
-			I.[PROCEDENCIA]
+			I.[PROCEDENCIA],
+			EDLP.[EDLP]
 
 	) AS I
 	UNPIVOT (
@@ -95,7 +102,8 @@ FROM (
 			[PGC],
 			[PERECIBLES],
 			[MMPP],
-			[IMPORTADO]
+			[IMPORTADO],
+			[EDLP]
 		)
 	) upvtable
 ) AS I

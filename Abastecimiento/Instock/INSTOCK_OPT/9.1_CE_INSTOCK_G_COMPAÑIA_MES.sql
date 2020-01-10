@@ -1,18 +1,21 @@
 --========= CE_INSTOCK_G_COMPAÑIA_MES ======================================
-/* Updated_at: 2019/11/21
+/* Updated_at: 2020/01/08
  * Updated_by: Sebastian Cornejo
- * Detalle: Filtro de salas cerradas se hace cruzando con la tabla TIENDAS_ASENTADAS
+ * Detalle: 
+ *	-> 2019/11/21: Filtro de salas cerradas se hace cruzando con la tabla TIENDAS_ASENTADAS
+ *	-> 2020/01/08: Se agrega EDLP
  */
 
 
--- TRUNCATE TABLE [INSTOCK_OPT].[dbo].[CE_INSTOCK_G_COMPAÑIA_MES]
+TRUNCATE TABLE [INSTOCK_OPT].[dbo].[CE_INSTOCK_G_COMPAÑIA_MES]
 
--- INSERT INTO [INSTOCK_OPT].[dbo].[CE_INSTOCK_G_COMPAÑIA_MES] (
--- 	[Cuadro Resumen]
--- 	,[INSTOCK_G]
--- 	,[INSTOCK]
--- 	,[FECHA]
--- )
+INSERT INTO [INSTOCK_OPT].[dbo].[CE_INSTOCK_G_COMPAÑIA_MES] (
+	[Cuadro Resumen]
+	,[INSTOCK_G]
+	,[INSTOCK]
+	,[FECHA]
+)
+
 
 -- SELECT 
 -- 	'INSTOCK COMPAÑIA' AS [Cuadro Resumen]
@@ -134,33 +137,30 @@ FROM (
 			SUM(NUM_VTA_SEM_X_PERFIL) NUM_VTA_SEM_X_PERFIL,
 			1 [INSTOCK COMPAÑIA],
 			CASE WHEN TOP_500 = 'TOP500' THEN 1 END TOP500,
-			CASE WHEN TOP_2100 = 'TOP2100' THEN 1 END TOP2100
+			CASE WHEN TOP_2100 = 'TOP2100' THEN 1 END TOP2100,
+			CASE WHEN EDLP = 'X' THEN 1 END EDLP
 			-- CASE WHEN MMPP = 'MMPP' THEN 1 END MMPP
 		FROM INSTOCK_OPT.dbo.MAIL_INSTOCK_SUBDEP_2_TOP_DIV I
 		INNER JOIN INSTOCK_OPT.dbo.DHW_MES_GC AS F
 			ON F.FECHA = CONVERT(DATE, FECHA_ACTUALIZ)
 		WHERE
 			(
-				(
-					DIVISION IN ('J01 - PGC COMESTIBLE', 'J02 - PGC NO COMESTIBLE', 'J05 - FLC') 
-					AND SIS_REPOSICION IN ('Reposicion x ASR','Informar a ASR')
-				)
-				OR (
-					DIVISION IN ('J06 - PANADERIA Y PASTELERIA','J07 - PLATOS PREPARADOS')
-					AND SIS_REPOSICION in ('Reposicion x ASR')
-				)
+				(DIVISION IN ('J01 - PGC COMESTIBLE', 'J02 - PGC NO COMESTIBLE', 'J05 - FLC') AND SIS_REPOSICION IN ('Reposicion x ASR','Informar a ASR'))
+				OR (DIVISION IN ('J06 - PANADERIA Y PASTELERIA','J07 - PLATOS PREPARADOS')AND SIS_REPOSICION in ('Reposicion x ASR'))
 			)
 		GROUP BY 
 			MES_GROGORIANO,
 			TOP_2100,
-			TOP_500
+			TOP_500,
+			EDLP
 			-- MMPP
 	) I
 	UNPIVOT (
 		FILTRO FOR CUADRO_RESUMEN IN (
 			[INSTOCK COMPAÑIA],
 			TOP500,
-			TOP2100
+			TOP2100,
+			EDLP
 			-- MMPP
 		)
 	) AS unpvt

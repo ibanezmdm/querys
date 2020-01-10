@@ -1,3 +1,10 @@
+/*-- ?? SELECT * FROM [INFORMES3].[dbo].[INSTOCK_NUEVA_PLANILLA_RESUMEN_SEMANA]
+ * Updated_by: Sebastian E Cornejo B
+ * Updated_at: 2020/01/08
+ * Cambios: 
+ *	-> 2020/01/08 Se Agrega Instock EDLP
+ */
+
 INSERT INTO [INFORMES3].[dbo].[INSTOCK_NUEVA_PLANILLA_RESUMEN_SEMANA] (
 	[SEMANA]
 	,[COD_CLASIFICACION_SKU]
@@ -20,51 +27,55 @@ INSERT INTO [INFORMES3].[dbo].[INSTOCK_NUEVA_PLANILLA_RESUMEN_SEMANA] (
 	,[CANTIDAD_SKUS]
 	,[DEMANDA_SEMANAL]
 	,[SIS_REPOSICION]
+	,[EDLP]
 )
 
 SELECT 
-	[semana], 
-	[nuevo_abc], 
-	[estado], 
-	[top_2100], 
-	[top_500], 
-	[mmpp], 
-	[inv_negativo], 
-	[nom_local], 
-	[cod_local], 
-	[division], 
-	[departamento], 
-	[subdep], 
-	[metod_abast], 
-	Sum([num_oh_valorizado])    AS [NUM_OH_VALORIZADO], 
-	Sum([num_vta_sem_x_perfil]) AS [NUM_VTA_SEM_X_PERFIL], 
-	Sum([vta_perdida_vp])       AS [VTA_PERDIDA_VP], 
-	Sum([costo_inv_disp_hoy])   AS [COSTO_INV_DISP_HOY], 
-	Sum([monto_vta])            AS [MONTO_VTA], 
-	Sum([cantidad_skus])        AS [CANTIDAD_SKUS], 
-	Sum([demanda_semanal])      AS [DEMANDA_SEMANAL], 
-	[sis_reposicion] 
+	I.[semana], 
+	I.[nuevo_abc], 
+	I.[estado], 
+	I.[top_2100], 
+	I.[top_500], 
+	I.[mmpp], 
+	I.[inv_negativo], 
+	I.[nom_local], 
+	I.[cod_local], 
+	I.[division], 
+	I.[departamento], 
+	I.[subdep], 
+	I.[metod_abast], 
+	Sum(I.[num_oh_valorizado])    AS [NUM_OH_VALORIZADO], 
+	Sum(I.[num_vta_sem_x_perfil]) AS [NUM_VTA_SEM_X_PERFIL], 
+	Sum(I.[vta_perdida_vp])       AS [VTA_PERDIDA_VP], 
+	Sum(I.[costo_inv_disp_hoy])   AS [COSTO_INV_DISP_HOY], 
+	Sum(I.[monto_vta])            AS [MONTO_VTA], 
+	Sum(I.[cantidad_skus])        AS [CANTIDAD_SKUS], 
+	Sum(I.[demanda_semanal])      AS [DEMANDA_SEMANAL], 
+	I.[sis_reposicion],
+	EDLP.EDLP
 --INTO   [INFORMES3].[dbo].[instock_nueva_planilla_resumen_semana] 
-FROM [INFORMES3].[dbo].[instock_nueva_planilla_historia]
+FROM [INFORMES3].[dbo].[instock_nueva_planilla_historia] I
+LEFT JOIN [INSTOCK_OPT].dbo.SKU_EDLP EDLP
+	ON EDLP.SKU = I.SKU
 WHERE 
 	semana IN (DATEPART(WW, GETDATE()) - 1 + DATEPART(yy, GETDATE())*100)
-	and (
-		DIVISION like 'J01%' 
-		or DIVISION  like 'J02%' 
-		or DIVISION  like 'J05%'
+	AND (
+		(I.[DIVISION] IN ('J01 - PGC COMESTIBLE', 'J02 - PGC NO COMESTIBLE', 'J05 - FLC') AND I.[SIS_REPOSICION] IN ('Reposicion x ASR', 'Informar a ASR'))
+		OR (I.[DIVISION] IN ('J06 - PANADERIA Y PASTELERIA', 'J07 - PLATOS PREPARADOS') AND I.[SIS_REPOSICION] IN ('Reposicion x ASR'))
 	)
 GROUP BY 
-	[semana], 
-	[nuevo_abc], 
-	[estado], 
-	[top_2100], 
-	[top_500], 
-	[mmpp], 
-	[inv_negativo], 
-	[nom_local], 
-	[cod_local], 
-	[division], 
-	[departamento], 
-	[subdep], 
-	[metod_abast], 
-	[sis_reposicion]
+	I.[semana], 
+	I.[nuevo_abc], 
+	I.[estado], 
+	I.[top_2100], 
+	I.[top_500], 
+	I.[mmpp], 
+	I.[inv_negativo], 
+	I.[nom_local], 
+	I.[cod_local], 
+	I.[division], 
+	I.[departamento], 
+	I.[subdep], 
+	I.[metod_abast], 
+	I.[sis_reposicion],
+	EDLP.EDLP
