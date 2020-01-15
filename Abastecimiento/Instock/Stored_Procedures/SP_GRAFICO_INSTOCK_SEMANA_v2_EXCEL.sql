@@ -1,0 +1,92 @@
+USE [INFORMES3]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author: Sebastian Cornejo
+-- Created at: 2019/11/12
+-- Updated at: 2020/01/09
+-- Description: Datos para Grafico Instock Evolutivo Semanal 
+-- 	-> 2019/11/27: Se agrega filtro de tiendas cerradas con la tabla TIEDAS_ASENTADAS
+-- 	-> 2020/01/09: Se genera a partir de la tabla MAIL_INSTOCK_SUBDEP_2_TOP_DIV y se agrega EDLP
+-- ?? EXEC [INFORMES3].[dbo].[SP_GRAFICO_INSTOCK_SEMANA_v2_EXCEL]
+-- =============================================
+CREATE PROCEDURE [dbo].[SP_GRAFICO_INSTOCK_SEMANA_v2_EXCEL]
+
+AS
+
+BEGIN
+
+	SELECT TOP 8
+		SEMANA,
+		[INSTOCK COMPAÑIA]/100 COMPAÑIA,
+		[TOP500]/100 [TOP 500],
+		[TOP2100]/100 [TOP 2100],
+		[EDLP]/100 [EDLP]
+	FROM (
+		SELECT
+			CUADRO_RESUMEN,
+			CONVERT(NUMERIC(12, 2), SUM(NUM_OH_VALORIZADO) / NULLIF (SUM(NUM_VTA_SEM_X_PERFIL), 0) * 100) AS INSTOCK_G,
+			SEMANA
+		FROM (
+
+			SELECT 
+				SEMANA,
+				NUM_OH_VALORIZADO,
+				NUM_VTA_SEM_X_PERFIL,
+				CUADRO_RESUMEN,
+				FILTRO
+			FROM (
+				SELECT 
+					F.SEMANA SEMANA,
+					SUM(NUM_OH_VALORIZADO) NUM_OH_VALORIZADO,
+					SUM(NUM_VTA_SEM_X_PERFIL) NUM_VTA_SEM_X_PERFIL,
+					1 [INSTOCK COMPAÑIA],
+					CASE WHEN TOP_500 = 'TOP500' THEN 1 END TOP500,
+					CASE WHEN TOP_2100 = 'TOP2100' THEN 1 END TOP2100,
+					CASE WHEN EDLP = 'X' THEN 1 END EDLP
+					-- CASE WHEN MMPP = 'MMPP' THEN 1 END MMPP
+				FROM INSTOCK_OPT.dbo.MAIL_INSTOCK_SUBDEP_2_TOP_DIV I
+				INNER JOIN INSTOCK_OPT.dbo.DHW_MES_GC AS F
+					ON F.FECHA = CONVERT(DATE, FECHA_ACTUALIZ)
+				WHERE
+					(
+						(DIVISION IN ('J01 - PGC COMESTIBLE', 'J02 - PGC NO COMESTIBLE', 'J05 - FLC') AND SIS_REPOSICION IN ('Reposicion x ASR','Informar a ASR'))
+						OR (DIVISION IN ('J06 - PANADERIA Y PASTELERIA','J07 - PLATOS PREPARADOS')AND SIS_REPOSICION in ('Reposicion x ASR'))
+					)
+				GROUP BY 
+					SEMANA,
+					TOP_2100,
+					TOP_500,
+					EDLP
+					-- MMPP
+			) I
+			UNPIVOT (
+				FILTRO FOR CUADRO_RESUMEN IN (
+					[INSTOCK COMPAÑIA],
+					TOP500,
+					TOP2100,
+					EDLP
+					-- MMPP
+				)
+			) AS unpvt
+
+		) AS I
+		GROUP BY 
+			CUADRO_RESUMEN, 
+			SEMANA
+	) I
+	PIVOT (
+		SUM(INSTOCK_G) FOR CUADRO_RESUMEN IN (
+		[INSTOCK COMPAÑIA],
+		[TOP500],
+		[TOP2100],
+		[EDLP]
+		)
+	) pvtbl
+	ORDER BY SEMANA DESC
+
+END
