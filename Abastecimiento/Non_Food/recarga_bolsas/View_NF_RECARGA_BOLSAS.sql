@@ -9,12 +9,14 @@ AS
 	-- =============================================
 	-- Author:			<Sebastian Cornejo Berrios>
 	-- Create at:		<2020/11/16>
-	-- Update at:		<2020/11/24>
+	-- Update at:		<2021/05/03>
 	-- Description:	Reporte automatico para recargas de bolas
 	-- Update:
 	-- 	-> 2020/11/24: Se agrega trfs de PMM, se reemplaza la cantidad on order por las trfs cuando el on order de ASR es null
 	--	-> 2021/04/05: Se añade stock y transito de skus 20451555, 20451556, 20451557, 20451558 al sku 20406527
-	-- ?? SELECT * FROM [RepNonFood].[dbo].[View_NF_RECARGA_BOLSAS] where sku = 20406527 order by sku, cod_local 
+	-- 	-> 2021/04/07: Se actualiza calculo de balance
+	-- 	-> 2021/05/03: Si el valor de las trfs es nulo se reemplaza por un 0
+	-- ?? SELECT * FROM [RepNonFood].[dbo].[View_NF_RECARGA_BOLSAS] where cod_local = 513 order by sku, cod_local 
 	-- =============================================
 
 	with base_recarga_bolsas as (
@@ -27,11 +29,11 @@ AS
 			s.camada_plltz * s.estiba_plltz * casepack plltz,
 			ra.cod_prov_pmm,
 			ra.nom_prov,
-			oh.UN_INV_DISP_HOY +  isnull(oh_t.on_hand, 0) UN_INV_DISP_HOY,
+			oh.UN_INV_DISP_HOY + isnull(oh_t.on_hand, 0) UN_INV_DISP_HOY,
 			case when oh.UN_INV_DISP_HOY < 0 then 0 else oh.UN_INV_DISP_HOY end + isnull(oh_t.on_hand, 0) un_inv_disp_local,
 			ac.IONHND on_hand,
-			case when ac.IONORD is null then trf.trfs else ac.IONORD end + isnull(oh_t.on_order, 0) on_order,
-			case when oh.UN_INV_DISP_HOY < 0 then 0 else oh.UN_INV_DISP_HOY end + isnull(oh_t.on_hand, 0) + isnull(ac.IONORD, 0) + isnull(oh_t.on_order, 0) balance,
+			case when ac.IONORD is null then isnull(trf.trfs, 0) else ac.IONORD end + isnull(oh_t.on_order, 0) on_order,
+			case when oh.UN_INV_DISP_HOY < 0 then 0 else isnull(oh.UN_INV_DISP_HOY, 0) end + isnull(oh_t.on_hand, 0) + case when ac.IONORD is null then isnull(trf.trfs, 0) else ac.IONORD end + isnull(oh_t.on_order, 0) balance,
 			case 
 				when s.sku_espejo is not null and le.cod_local is not null then isnull(round(plse.prom_acotado * s.factor_espejo, 0), ceiling(CASEPACK / s.semanas))
 				when le.cod_local is not null then isnull(round(ple.prom_acotado, 0), ceiling(CASEPACK / s.semanas))
@@ -103,7 +105,9 @@ AS
 		) oh_t
 			on oh_t.COD_LOCAL = ra.cod_local
 			and convert(int, oh_t.sku) = convert(int, s.sku)
-		where ra.cod_local not in (115, 148, 147, 138)
+		where ra.cod_local not in (115, 148, 147, 138, 109)
+			-- and ra.cod_local = 111
+			-- and s.sku = 20441070
 	)
 
 	select *,
@@ -121,7 +125,7 @@ AS
 			else ceiling((perfil_vta * semanas + isnull(carga_fazil, 0) - isnull(balance,0)) / CASEPACK)
 		end recarga_ctn
 	from base_recarga_bolsas
-	where cod_local <> 109
+	-- where cod_local <> 109
 	-- order by sku, cod_local
 
 GO
