@@ -1,0 +1,10 @@
+
+TRUNCATE TABLE [PronosticosVentas].[dbo].[INDICE_SURTIDO_HOY_VNP]
+INSERT INTO [PronosticosVentas].[dbo].[INDICE_SURTIDO_HOY_VNP]
+
+
+SELECT DISTINCT
+	[SKU]
+	,[COD_LOCAL]
+FROM [10.195.254.201].[CONTROL_STOCK].[dbo].[CONTROL_STOCK_SURTIDO_X_PC]
+where sku is not null

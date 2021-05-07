@@ -1,0 +1,29 @@
+SELECT
+	DEPARTAMENTO,
+	NOM_CATALOGO,
+	P.NOM_PROMOCION,
+	P.DETALLE_PROMOCION,
+	P.SKU,
+	P.NOM_SKU,
+	ESTADO,
+	P.NOM_PROVEEDOR,
+	P.COD_LOCAL,
+	F.COD_LOCAL AS COD_LOCAL_PC,
+	F.PICKING_CENTER,
+	[Pronostico Unidades] [Pronostico Unidades VNP],
+	p.factor,
+	bfactor,
+	[Pronostico Modificado],
+	CEILING([Pronostico Modificado] * f.FACTOR) [Pronostico Unidades PC],
+	CEILING(([Pronostico Modificado] * f.FACTOR) / CASE WHEN UXC = 0 THEN 1 ELSE UXC END) [Pronostico Cajas],
+	UXC,
+	CEILING(([Pronostico Modificado] * f.FACTOR) / CASE WHEN UXC = 0 THEN 1 ELSE UXC END) * CASE WHEN UXC = 0 THEN 1 ELSE UXC END [Unidades Efectivas],
+	CASE WHEN S.SKU IS NOT NULL AND S.COD_LOCAL IS NOT NULL THEN 1 ELSE 0 END INDICE_SURTIDO
+FROM [PronosticosVentas].[dbo].[PRONOSTICO_RESUMEN_2] P
+LEFT JOIN [PronosticosVentas].[dbo].[FACTOR_VNP] F
+	ON LEFT(F.DIVISION, 3) = LEFT(P.DEPARTAMENTO, 3)
+LEFT JOIN [PronosticosVentas].[dbo].[INDICE_SURTIDO_HOY_VNP] S
+	ON P.SKU = S.SKU
+	AND F.COD_LOCAL = S.COD_LOCAL
+WHERE (P.COD_LOCAL = 115)
+	AND F.COD_LOCAL in (147, 138)
