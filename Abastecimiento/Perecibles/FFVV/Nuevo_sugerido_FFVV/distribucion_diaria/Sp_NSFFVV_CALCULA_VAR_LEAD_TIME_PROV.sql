@@ -1,6 +1,6 @@
 USE [NUEVO_SUGERIDO_FFVV]
 GO
-/****** Object:  StoredProcedure [dbo].[Sp_NSFFVV_CALCULA_VAR_LEAD_TIME_PROV]    Script Date: 02/05/2021 21:59:59 ******/
+
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -9,7 +9,7 @@ GO
 -- Author:		Sebastian Cornejo
 -- Create date: 2021/02/25
 -- Description:	calcula lead-time desde la fecha actual hasta los dias de depacho desde el cd a locales.
--- ?? EXEC [NUEVO_SUGERIDO_FFVV].dbo.[Sp_NSFFVV_CALCULA_VAR_LEAD_TIME_PROV] '2021-05-03'
+-- ?? EXEC [NUEVO_SUGERIDO_FFVV].dbo.[Sp_NSFFVV_CALCULA_VAR_LEAD_TIME_PROV] '2021-05-24'
 -- ?? select * from NUEVO_SUGERIDO_FFVV.dbo.NSFFVV_VAR_LEAD_TIME_PROV where cod_local = 104
 -- =============================================
 

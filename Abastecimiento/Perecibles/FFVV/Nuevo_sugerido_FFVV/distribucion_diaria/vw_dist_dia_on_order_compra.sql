@@ -1,6 +1,10 @@
 
+USE [NUEVO_SUGERIDO_FFVV]
+GO
+
 SET ANSI_NULLS ON
 GO
+
 SET QUOTED_IDENTIFIER ON
 GO
 
@@ -19,10 +23,10 @@ AS
 	with on_order as (
 
 		select *
-		from NUEVO_SUGERIDO_FFVV.dbo.NSFFVV_dist_dia_oo_oc_sem_pedido oc
+		from NUEVO_SUGERIDO_FFVV.dbo.NSFFVV_dist_dia_oo_compras_sem_pedido oc
 		union 
 		select *
-		from NUEVO_SUGERIDO_FFVV.dbo.NSFFVV_dist_dia_oo_oc_sem_anterior oca
+		from NUEVO_SUGERIDO_FFVV.dbo.NSFFVV_dist_dia_oo_compras_sem_anterior oca
 	)
 
 	select 

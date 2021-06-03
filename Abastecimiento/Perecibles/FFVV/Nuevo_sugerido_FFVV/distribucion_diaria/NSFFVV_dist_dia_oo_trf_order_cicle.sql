@@ -50,8 +50,8 @@ declare @iteracion as int = 1;
 		SUM(trfs.on_order) on_order_trf
 	from trfs
 	inner join [NUEVO_SUGERIDO_FFVV].[dbo].[NSFFVV_CICLO_DIA_FRECUENCIAS] cf
-		on case when cf.dia_sala < cf.dia_entrega_cd then cf.dia_sala + 7 else cf.dia_sala end < trfs.dia_sala
-		and case when cf.dia_sala_sig < cf.sig_frecuencia then cf.dia_sala_sig + 7 else cf.dia_sala_sig end >= trfs.dia_sala
+		on case when cf.dia_sala < cf.dia_entrega_cd then cf.dia_sala + 7 else cf.dia_sala end <= trfs.dia_sala
+		and case when cf.dia_sala_sig < cf.sig_frecuencia then cf.dia_sala_sig + 7 else cf.dia_sala_sig end > trfs.dia_sala
 		and cf.cod_local = trfs.cod_local
 		and cf.id_semana = trfs.id_semana
 	where trfs.id_semana = @id_semana_pedido

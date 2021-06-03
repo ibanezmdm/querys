@@ -1,7 +1,7 @@
 
 -- declare @dia_pedido date = (select MAX(fecha_hora) from NUEVO_SUGERIDO_FFVV.dbo.NSFFVV_SUGERIDO_CALCULADO_F)
-declare @dia_pedido date = '2021-05-05';
--- declare @dia_pedido date = getdate();
+-- declare @dia_pedido date = '2021-05-20';
+declare @dia_pedido date = getdate();
 declare @dia_inicio_compra date = dateadd(day, 8 - datepart(weekday, @dia_pedido), @dia_pedido);
 declare @id_semana_pedido int = datepart(year, @dia_inicio_compra) * 100 + datepart(iso_week, @dia_inicio_compra);
 declare @id_semana_anterior int = datepart(year, dateadd(day, -7, @dia_inicio_compra)) * 100 + datepart(iso_week, dateadd(day, -7, @dia_inicio_compra));
@@ -24,7 +24,7 @@ declare @iteracion as int = 1;
 	* param:	@dia >> indica el primer dia de despacho a cd
 	* -- ?? select * from [NUEVO_SUGERIDO_FFVV].[dbo].[NSFFVV_dist_dia_estimacion_compra]
 	**/
-	--!! truncate table NUEVO_SUGERIDO_FFVV.dbo.[NSFFVV_dist_dia_estimacion_compra];
+	truncate table NUEVO_SUGERIDO_FFVV.dbo.[NSFFVV_dist_dia_estimacion_compra];
 
 	while @dia <= 6
 	begin
@@ -54,8 +54,9 @@ declare @iteracion as int = 1;
 				isnull(fv.stock_seguridad, 0) stock_seguridad,
 				isnull(mp.min, 1) * sf.casepack min_pres,
 				isnull(fvi.lt_prov, 0) lt_prov_ini,
-				isnull(fvi.lt_cd, 0) lt_cd_ini
-
+				isnull(fvi.lt_cd, 0) lt_cd_ini,
+				isnull(cm.criterio_merma, 0) criterio_merma
+			
 			FROM [NUEVO_SUGERIDO_FFVV].[dbo].[NSFFVV_SUGERIDO_CALCULADO_F] sf
 			left join RepNonFood.dbo.MAESTRA_SKU ms
 				on ms.SKU = sf.sku
@@ -82,12 +83,15 @@ declare @iteracion as int = 1;
 			left join [NUEVO_SUGERIDO_FFVV].[dbo].[NSFFVV_MIN_PRES] mp
 				ON MP.SKU = sf.SKU
 				AND MP.COD_LOCAL = sf.LOCAL
+			left join NUEVO_SUGERIDO_FFVV.dbo.vw_criterio_merma cm
+				on cm.cod_local = sf.[local]
+				and cm.sku = sf.sku
 			where sf.semana in (@id_semana_pedido)
 				and case when sf.corregido is null then sf.SUGERIDO_CAJAS else sf.corregido end is not null
 				-- and cf.dia_entrega_cd = 1
 		)
 
-		--!! insert into NUEVO_SUGERIDO_FFVV.dbo.[NSFFVV_dist_dia_estimacion_compra]
+		insert into NUEVO_SUGERIDO_FFVV.dbo.[NSFFVV_dist_dia_estimacion_compra]
 
 		select 
 			-- ddb.*,
@@ -99,6 +103,23 @@ declare @iteracion as int = 1;
 			ddb.semana,
 			ddb.sugerido_cajas,
 			case 
+				-- Si criterio_merma = 1 solo se comprara para mantener stock_seguridad + min_pres
+				when criterio_merma = 1 then 
+					case 
+						-- si el oh_teorico_inicial es menor que 0 entonces mantedremos solo el stock inicial durante todo el proceso
+						when oh_teorico_inicial_semana < 0 then 
+							case 
+								when (ddb.stock_seguridad + ddb.min_pres) > ((ddb.compra_order_cicle) * ddb.factor_fr + ddb.trf_order_cicle + ddb.oh_teorico_inicial_n)
+									then ceiling((ddb.stock_seguridad  + ddb.min_pres - ((ddb.compra_order_cicle) * ddb.factor_fr + ddb.trf_order_cicle + ddb.oh_teorico_inicial_n)) / casepack) * casepack
+								else 0
+							end 
+						else 
+							case 
+								when (ddb.stock_seguridad + ddb.min_pres) > ((ddb.compra_order_cicle) * ddb.factor_fr + ddb.trf_order_cicle + ddb.oh_teorico_inicial)
+									then ceiling((ddb.stock_seguridad + ddb.min_pres - ((ddb.compra_order_cicle) * ddb.factor_fr + ddb.trf_order_cicle + ddb.oh_teorico_inicial)) / casepack) * casepack
+								else 0 
+							end
+					end
 				when oh_teorico_inicial_semana < 0 then 
 					case 
 						when (ddb.order_cicle + ddb.stock_seguridad + ddb.min_pres) > ((ddb.compra_order_cicle) * ddb.factor_fr + ddb.trf_order_cicle + ddb.oh_teorico_inicial_n)
@@ -107,7 +128,7 @@ declare @iteracion as int = 1;
 					end 
 				else 
 					case 
-						when ddb.order_cicle + ddb.stock_seguridad + ddb.min_pres > ((ddb.compra_order_cicle) * ddb.factor_fr + ddb.trf_order_cicle + ddb.oh_teorico_inicial)
+						when (ddb.order_cicle + ddb.stock_seguridad + ddb.min_pres) > ((ddb.compra_order_cicle) * ddb.factor_fr + ddb.trf_order_cicle + ddb.oh_teorico_inicial)
 							then ceiling((ddb.order_cicle + ddb.stock_seguridad + ddb.min_pres - ((ddb.compra_order_cicle) * ddb.factor_fr + ddb.trf_order_cicle + ddb.oh_teorico_inicial)) / casepack) * casepack
 						else 0 
 					end

@@ -18,39 +18,34 @@ declare @iteracion as int = 1;
 -- 	@iteracion iteracion
 
 
-/** Calculo on order por trf de la semana anterior al pedido.
-	* Desc:		Suma las cantidades compradas en trfs de la semana anterior al pedido, incluyendo el lead-time del cd
+
+/** Calculo compras semana de pedido.
+	* Desc:		Suma las cantidades en compras de la semana de pedido, incluyendo el lead-time del cd
 	* param:	@id_semana_pedido >> indica la semana de pedido
-	* param:	@dia_pedido >> el dia del que se tomaran las trfs
-	* -- ?? select * from [NUEVO_SUGERIDO_FFVV].[dbo].[NSFFVV_dist_dia_oo_trf_sem_anterior]
+	* -- ?? select * from [NUEVO_SUGERIDO_FFVV].[dbo].[NSFFVV_dist_dia_oo_compras_sem_pedido]
 	**/
-	--!! truncate table [NUEVO_SUGERIDO_FFVV].[dbo].[NSFFVV_dist_dia_oo_trf_sem_anterior];
-
-	with trfs as (
-		select 
-			sku,
-			cod_local,
-			cantidad on_order,
-			dia_entrega_cd,
-			id_semana
-		from [NUEVO_SUGERIDO_FFVV].[dbo].[NSFFVV_dist_dia_trfs]
-		where id_semana = @id_semana_anterior
-			and fecha_sala >= @dia_pedido
-	)
-
-	--!! insert into [NUEVO_SUGERIDO_FFVV].[dbo].[NSFFVV_dist_dia_oo_trf_sem_anterior]
+	-- !! truncate table [NUEVO_SUGERIDO_FFVV].[dbo].[NSFFVV_dist_dia_oo_compras_sem_pedido]
+	-- !! insert into [NUEVO_SUGERIDO_FFVV].[dbo].[NSFFVV_dist_dia_oo_compras_sem_pedido]
 
 	SELECT 
-		trfs.SKU,
-		trfs.cod_local cod_local,
+		c.SKU,
+		c.SALA cod_local,
 		cf.dia_entrega_cd,
-		SUM(trfs.on_order) on_order_trf
-	from trfs
+		SUM(c.CAJAS * case when ms.CASEPACK = 0 then 1 else isnull(ms.CASEPACK, 1) end) on_order
+		--c.fecha_esp_recep_sala,
+		--cf.dia_sala,
+		--c.dia_sala,
+		--UNID_SOLIC 
+	from [NUEVO_SUGERIDO_FFVV].[dbo].[vw_comprado] c
+	left join RepNonFood.dbo.MAESTRA_SKU ms
+		on ms.SKU = c.SKU
 	left join [NUEVO_SUGERIDO_FFVV].[dbo].[NSFFVV_CICLO_DIA_FRECUENCIAS] cf
-		on  cf.cod_local = trfs.cod_local
-		and cf.id_semana = @id_semana_pedido
-	-- where trfs.cod_local = 104
+		on case when cf.dia_sala < cf.dia_entrega_cd then cf.dia_sala + 7 else cf.dia_sala end > c.dia_sala
+		and cf.cod_local = c.SALA
+		and cf.id_semana = c.id_semana
+	where c.id_semana = @id_semana_pedido
 	group by
-		trfs.SKU,
-		trfs.cod_local,
+		c.SKU,
+		c.SALA,
 		cf.dia_entrega_cd
+

@@ -9,7 +9,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
-
 ALTER VIEW [dbo].[vw_dist_dia_transito]
 AS
 
@@ -28,7 +27,7 @@ AS
 			dia_entrega_cd,
 			on_order transito,
 			'compra_order_cicle' tipo
-		from NUEVO_SUGERIDO_FFVV.dbo.NSFFVV_dist_dia_oo_oc_order_cicle
+		from NUEVO_SUGERIDO_FFVV.dbo.NSFFVV_dist_dia_oo_compras_order_cicle
 		union 
 		select *, 'on_order_compra'
 		from NUEVO_SUGERIDO_FFVV.dbo.vw_dist_dia_on_order_compra

@@ -2,7 +2,6 @@
 USE [NUEVO_SUGERIDO_FFVV]
 GO
 
-/****** Object:  View [dbo].[vw_dist_dia_on_order_trf]    Script Date: 22/04/2021 15:57:03 ******/
 SET ANSI_NULLS ON
 GO
 
