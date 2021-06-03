@@ -1,0 +1,14 @@
+
+TRUNCATE TABLE NUEVO_SUGERIDO_FFVV.dbo.NSFFVV_VENTA_SEM_ANTERIOR
+INSERT INTO NUEVO_SUGERIDO_FFVV.dbo.NSFFVV_VENTA_SEM_ANTERIOR
+	--?? select * from NUEVO_SUGERIDO_FFVV.dbo.NSFFVV_VENTA_SEM_ANTERIOR
+
+	SELECT 
+		COD_LOCAL
+		,SKU
+		,SUM(VTA) VTA_SEM_ANTERIOR
+	FROM NUEVO_SUGERIDO_FFVV.dbo.NSFFVV_VENTA_SEMANAL
+	WHERE SEMANA = (datepart(year, getdate() + 1 - 7 - datepart(weekday, getdate())) * 100 + datepart(iso_week, getdate() + 1 - 7 - datepart(weekday, getdate())))
+	GROUP BY 
+		COD_LOCAL
+		,SKU

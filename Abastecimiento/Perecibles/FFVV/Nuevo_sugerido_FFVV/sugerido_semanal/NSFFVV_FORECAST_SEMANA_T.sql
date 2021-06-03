@@ -1,0 +1,21 @@
+
+TRUNCATE TABLE NUEVO_SUGERIDO_FFVV.dbo.NSFFVV_FORECAST_SEMANA_T
+INSERT INTO NUEVO_SUGERIDO_FFVV.dbo.NSFFVV_FORECAST_SEMANA_T
+	--?? select * from NUEVO_SUGERIDO_FFVV.dbo.NSFFVV_FORECAST_SEMANA_T
+
+	SELECT 
+		SEMANA,
+		COD_LOCAL,
+		SKU,
+		AVG(FORECAST_DIA) FORECAST_PROM_DIA_SEM_T,
+		SUM(FORECAST_DIA) FORECAST_SEM_T
+	from NUEVO_SUGERIDO_FFVV.dbo.NSFFVV_FORECAST_DIARIO
+	where SEMANA = (datepart(year, getdate() + 1 + 7 - datepart(weekday, getdate())) * 100 + datepart(iso_week, getdate() + 1 + 7 - datepart(weekday, getdate())))
+	GROUP BY 
+		SEMANA,
+		COD_LOCAL,
+		SKU
+	ORDER BY 
+		SEMANA,
+		COD_LOCAL,
+		SKU
