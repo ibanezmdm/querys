@@ -12,7 +12,7 @@ ALTER VIEW [dbo].[vw_lead_time]
 AS
 
 	/*	Author:				Sebastian Esteban Cornejo Berrios
-	 *	Description:	Consulta que compara el contenido dentro de la descripcion de un producto contra el contenido de la subclase asociada
+	 *	Description:	Entrega el maximo lead time que tiene el cd para cada uno de los locales
 	 *	Created_at: 	2021/03/03
 	 *	Updated_at:		2021/05/01
 	 *	Cambios:			

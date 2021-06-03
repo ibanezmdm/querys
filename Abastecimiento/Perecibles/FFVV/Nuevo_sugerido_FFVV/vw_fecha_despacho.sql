@@ -17,7 +17,7 @@ AS
 	 *	Updated_at:		----/--/--
 	 *	Cambios:			
 	 *	-> ----/--/--: 
-	 *	-- ?? SELECT * FROM NUEVO_SUGERIDO_FFVV.dbo.vw_fecha_despacho
+	 *	-- ?? SELECT * FROM NUEVO_SUGERIDO_FFVV.dbo.vw_fecha_despacho where id_semana = 202119
 	 */
 
 	
