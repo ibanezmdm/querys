@@ -9,8 +9,9 @@ AS
 	/*	Author:				Sebastian Esteban Cornejo Berrios
 	 *	Description:	Consulta que muestra el inventario de las 2 ultimas semanas y el promedio de venta de las 4 ultimas semanas de productos inactivos y descontinuados de J09
 	 *	Created_at: 	2020/09/02
-	 *	Updated_at:		
+	 *	Updated_at:		2021/05/18
 	 *	Cambios:
+	 *		-> 2021/05/18: se asigna valor 1 a campo mayor_a_cero cunado el local de origes es 115.
 	 *	-- TODO: 
 	 *	-- ?? SELECT * FROM RepNonFood.[dbo].[View_seguimientoj09] where cod_local = 101 and sku = 3023049
 	 */
@@ -25,7 +26,11 @@ AS
 		oh.UN_INV_CONT_HOY,
 		oh.UN_INV_DISP_HOY,
 		case when cv.cto_vta_X < 800 or cv.cto_vta_X is null then 800 else cv.cto_vta_X end cto_vta_X,
-		case when oh.COSTO_INV_CONT_HOY > 0 then 1 else 0 end mayor_a_cero,
+		case 
+			when oh.COD_LOCAL = 115 then 1
+			when oh.COSTO_INV_CONT_HOY > 0 then 1 
+			else 0
+		end mayor_a_cero,
 		vta.un_vta,
 		vta.cto_vta,
 		vta.vta,
